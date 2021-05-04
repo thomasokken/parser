@@ -949,6 +949,7 @@ void Positive::printAlg(OutputStream *os) {
 
 void Positive::printRpn(OutputStream *os) {
     ev->printRpn(os);
+    os->write(" nop");
 }
 
 ///////////////////
@@ -1248,6 +1249,7 @@ class Lexer {
             done:
             // Invalid number scenarios:
             if (d0 == 0 && d1 == 0 // A '.' not followed by a digit.
+                    || state == 1 && c == '.' // Multiple periods
                     || state == 2  // An 'E' not followed by a valid character.
                     || state == 3 && d2 == 0) { // An 'E' not followed by at least one digit
                 *tok = "";
@@ -1308,7 +1310,11 @@ class Parser {
         while (true) {
             std::string t;
             int tpos;
-            if (!nextToken(&t, &tpos) || t == "")
+            if (!nextToken(&t, &tpos)) {
+                delete ev;
+                return NULL;
+            }
+            if (t == "")
                 return ev;
             if (t == "+" || t == "-") {
                 Evaluator *ev2 = parseTerm();
@@ -1345,31 +1351,28 @@ class Parser {
             Evaluator *ev = parseFactor();
             if (ev == NULL)
                 return NULL;
-            return parseTerm2(ev);
-        }
-    }
-
-    Evaluator *parseTerm2(Evaluator *ev) {
-        std::string t;
-        int tpos;
-        if (!nextToken(&t, &tpos)) {
-            fail:
-            delete ev;
-            return NULL;
-        }
-        if (t == "")
-            return ev;
-        if (t == "*" || t == "/") {
-            Evaluator *ev2 = parseFactor();
-            if (ev2 == NULL)
-                goto fail;
-            if (t == "*")
-                return parseTerm2(new Product(tpos, ev, ev2));
-            else
-                return parseTerm2(new Quotient(tpos, ev, ev2));
-        } else {
-            pushback(t, tpos);
-            return ev;
+            while (true) {
+                if (!nextToken(&t, &tpos)) {
+                    delete ev;
+                    return NULL;
+                }
+                if (t == "")
+                    return ev;
+                if (t == "*" || t == "/") {
+                    Evaluator *ev2 = parseFactor();
+                    if (ev2 == NULL) {
+                        delete ev;
+                        return NULL;
+                    }
+                    if (t == "*")
+                        ev = new Product(tpos, ev, ev2);
+                    else
+                        ev = new Quotient(tpos, ev, ev2);
+                } else {
+                    pushback(t, tpos);
+                    return ev;
+                }
+            }
         }
     }
 
