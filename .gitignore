@@ -1,0 +1,16 @@
+
+# /
+/.DS_Store
+/packages
+
+# /parser.xcodeproj/
+/parser.xcodeproj/*.mode1v3
+/parser.xcodeproj/*.pbxuser
+/parser.xcodeproj/xcuserdata
+
+# /parser.xcodeproj/project.xcworkspace/
+/parser.xcodeproj/project.xcworkspace/xcuserdata
+
+# /parser.xcodeproj/project.xcworkspace/xcshareddata/
+/parser.xcodeproj/project.xcworkspace/xcshareddata/*.xccheckout
+/parser.xcodeproj/project.xcworkspace/xcshareddata/*.xcscmblueprint
