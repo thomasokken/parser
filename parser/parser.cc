@@ -1199,6 +1199,7 @@ class Lexer {
         // Which one we're currently looking at depends on its
         // first character; if that's a digit or a decimal,
         // it's a number; anything else, it's a name.
+        bool multi_dot = false;
         if (c == '.' || c >= '0' && c <= '9') {
             int state = c == '.' ? 1 : 0;
             int d0 = c == '.' ? 0 : 1;
@@ -1218,8 +1219,10 @@ class Lexer {
                             goto done;
                         break;
                     case 1:
-                        if (c == '.')
+                        if (c == '.') {
+                            multi_dot = true;
                             goto done;
+                        }
                         else if (c == 'E' || c == 'e')
                             // Note: 42S exponent symbol!
                             state = 2;
@@ -1249,7 +1252,7 @@ class Lexer {
             done:
             // Invalid number scenarios:
             if (d0 == 0 && d1 == 0 // A '.' not followed by a digit.
-                    || state == 1 && c == '.' // Multiple periods
+                    || multi_dot // Multiple periods
                     || state == 2  // An 'E' not followed by a valid character.
                     || state == 3 && d2 == 0) { // An 'E' not followed by at least one digit
                 *tok = "";
