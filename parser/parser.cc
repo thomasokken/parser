@@ -1398,7 +1398,7 @@ class Parser {
     Evaluator *parseThing() {
         std::string t;
         int tpos;
-        if (!nextToken(&t, &tpos))
+        if (!nextToken(&t, &tpos) || t == "")
             return NULL;
         if (t == "-" || t == "+") {
             Evaluator *ev = parseThing();
