@@ -1380,21 +1380,23 @@ class Parser {
         Evaluator *ev = parseThing();
         if (ev == NULL)
             return NULL;
-        std::string t;
-        int tpos;
-        if (!nextToken(&t, &tpos)) {
-            fail:
-            delete ev;
-            return NULL;
-        }
-        if (t == "^") {
-            Evaluator *ev2 = parseFactor();
-            if (ev2 == NULL)
-                goto fail;
-            return new Power(tpos, ev, ev2);
-        } else {
-            pushback(t, tpos);
-            return ev;
+        while (true) {
+            std::string t;
+            int tpos;
+            if (!nextToken(&t, &tpos)) {
+                fail:
+                delete ev;
+                return NULL;
+            }
+            if (t == "^") {
+                Evaluator *ev2 = parseThing();
+                if (ev2 == NULL)
+                    goto fail;
+                ev = new Power(tpos, ev, ev2);
+            } else {
+                pushback(t, tpos);
+                return ev;
+            }
         }
     }
 
